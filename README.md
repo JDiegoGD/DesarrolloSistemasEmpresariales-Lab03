@@ -165,18 +165,9 @@ templates/
     └── lista_usuarios.html
 ```
 
-## Implementar DELETE (RF-08)
+## Implementar DELETE 
 
-Cada registro listado dispone de una opción **"Eliminar"**. El flujo exige confirmación explícita antes de borrar:
 
-1. **GET** `/entidad/<id>/eliminar/` — la vista recupera el objeto con `get_object_or_404` y muestra una página de confirmación (no elimina nada en este paso).
-2. El usuario confirma mediante un `<form method="POST">`.
-3. **POST** — la vista ejecuta `objeto.delete()`, generando el `DELETE` en SQLite mediante el ORM.
-4. **Redirect** al listado de la entidad, ya sin el registro eliminado.
-
-Django rechaza automáticamente cualquier POST sin token CSRF válido (403), evitando eliminaciones no autorizadas.
-
-Vistas: `eliminar_producto`, `eliminar_cliente`, `eliminar_usuario`, `eliminar_equipo`, `eliminar_ticket` (`inventario/views.py`).
 
 ```
 templates/
@@ -187,4 +178,3 @@ templates/
     ├── eliminar_ticket.html
     └── eliminar_usuario.html
 ```
-
