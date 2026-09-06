@@ -48,7 +48,10 @@
         <td>{{ ticket.get_estado_display }}</td>
         <td>{% if ticket.tecnico %}{{ ticket.tecnico.nombre_completo }}{% else %}Sin asignar{% endif %}</td>
         <td>{{ ticket.fecha_creacion }}</td>
-        <td><a href="{% url 'editar_ticket' ticket.id %}">Editar</a></td>
+        <td>
+            <a href="{% url 'editar_ticket' ticket.id %}">Editar</a> |
+            <a href="{% url 'eliminar_ticket' ticket.id %}">Eliminar</a>
+        </td>
     </tr>
     {% empty %}
     <tr>

@@ -34,7 +34,10 @@
         <td>{{ cliente.telefono }}</td>
         <td>{{ cliente.direccion_fiscal }}</td>
         <td>{% if cliente.activo %}Activo{% else %}Inactivo{% endif %}</td>
-        <td><a href="{% url 'editar_cliente' cliente.id %}">Editar</a></td>
+        <td>
+            <a href="{% url 'editar_cliente' cliente.id %}">Editar</a> |
+            <a href="{% url 'eliminar_cliente' cliente.id %}">Eliminar</a>
+        </td>
     </tr>
     {% empty %}
     <tr>

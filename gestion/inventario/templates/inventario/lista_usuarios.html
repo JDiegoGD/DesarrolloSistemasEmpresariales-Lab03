@@ -31,7 +31,10 @@
         <td>{{ usuario.email }}</td>
         <td>{{ usuario.get_rol_display }}</td>
         <td>{% if usuario.activo %}Activo{% else %}Inactivo{% endif %}</td>
-        <td><a href="{% url 'editar_usuario' usuario.id %}">Editar</a></td>
+        <td>
+            <a href="{% url 'editar_usuario' usuario.id %}">Editar</a> |
+            <a href="{% url 'eliminar_usuario' usuario.id %}">Eliminar</a>
+        </td>
     </tr>
     {% empty %}
     <tr>

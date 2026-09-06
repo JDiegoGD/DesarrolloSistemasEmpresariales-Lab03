@@ -35,6 +35,16 @@ def editar_producto(request, pk):
     return render(request, 'inventario/editar_producto.html', {'form': form, 'objeto': producto})
 
 
+# Vista para Eliminar un Producto (DELETE mediante ORM, con confirmacion previa)
+def eliminar_producto(request, pk):
+    producto = get_object_or_404(Producto, pk=pk)
+    if request.method == 'POST':
+        producto.delete()  # DELETE en SQLite usando Django ORM
+        return redirect('lista_productos')
+
+    return render(request, 'inventario/eliminar_producto.html', {'objeto': producto})
+
+
 # Vista para Listar Clientes (RF: consulta de clientes registrados)
 def lista_clientes(request):
     clientes = Cliente.objects.all().order_by('razon_social')
@@ -65,6 +75,16 @@ def editar_cliente(request, pk):
     return render(request, 'inventario/editar_cliente.html', {'form': form, 'objeto': cliente})
 
 
+# Vista para Eliminar un Cliente (DELETE mediante ORM, con confirmacion previa)
+def eliminar_cliente(request, pk):
+    cliente = get_object_or_404(Cliente, pk=pk)
+    if request.method == 'POST':
+        cliente.delete()
+        return redirect('lista_clientes')
+
+    return render(request, 'inventario/eliminar_cliente.html', {'objeto': cliente})
+
+
 # Vista para Listar Usuarios del sistema
 def lista_usuarios(request):
     usuarios = Usuario.objects.all().order_by('nombre_completo')
@@ -92,6 +112,16 @@ def editar_usuario(request, pk):
         form = UsuarioForm(instance=usuario)
 
     return render(request, 'inventario/editar_usuario.html', {'form': form, 'objeto': usuario})
+
+
+# Vista para Eliminar un Usuario (DELETE mediante ORM, con confirmacion previa)
+def eliminar_usuario(request, pk):
+    usuario = get_object_or_404(Usuario, pk=pk)
+    if request.method == 'POST':
+        usuario.delete()
+        return redirect('lista_usuarios')
+
+    return render(request, 'inventario/eliminar_usuario.html', {'objeto': usuario})
 
 
 # Vista para Listar Equipos Instalados (RF-04)
@@ -144,6 +174,16 @@ def editar_equipo(request, pk):
     return render(request, 'inventario/editar_equipo.html', {'form': form, 'objeto': equipo})
 
 
+# Vista para Eliminar un Equipo Instalado (DELETE mediante ORM, con confirmacion previa)
+def eliminar_equipo(request, pk):
+    equipo = get_object_or_404(EquipoInstalado, pk=pk)
+    if request.method == 'POST':
+        equipo.delete()
+        return redirect('lista_equipos')
+
+    return render(request, 'inventario/eliminar_equipo.html', {'objeto': equipo})
+
+
 # Vista para Consultar Panel de Tickets (RF-05)
 # Filtros soportados: prioridad y estado del ticket
 def lista_tickets(request):
@@ -180,3 +220,13 @@ def editar_ticket(request, pk):
         form = TicketSoporteForm(instance=ticket)
 
     return render(request, 'inventario/editar_ticket.html', {'form': form, 'objeto': ticket})
+
+
+# Vista para Eliminar un Ticket de Soporte (DELETE mediante ORM, con confirmacion previa)
+def eliminar_ticket(request, pk):
+    ticket = get_object_or_404(TicketSoporte, pk=pk)
+    if request.method == 'POST':
+        ticket.delete()
+        return redirect('lista_tickets')
+
+    return render(request, 'inventario/eliminar_ticket.html', {'objeto': ticket})
