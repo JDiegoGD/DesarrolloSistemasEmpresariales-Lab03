@@ -1,0 +1,42 @@
+{% extends 'inventario/base.html' %}
+
+{% block title %}Listado de Usuarios{% endblock %}
+
+{% block content %}
+<h2>Lista de Usuarios del Sistema</h2>
+
+<form class="filtros" method="get">
+    <label for="rol">Rol:</label>
+    <select name="rol" id="rol">
+        <option value="" {% if not rol_seleccionado %}selected{% endif %}>Todos</option>
+        {% for valor, etiqueta in roles %}
+        <option value="{{ valor }}" {% if rol_seleccionado == valor %}selected{% endif %}>{{ etiqueta }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit">Filtrar</button>
+    <a href="{% url 'lista_usuarios' %}">Limpiar</a>
+</form>
+
+<table>
+    <tr>
+        <th>Nombre Completo</th>
+        <th>Email</th>
+        <th>Rol</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+    </tr>
+    {% for usuario in usuarios %}
+    <tr>
+        <td>{{ usuario.nombre_completo }}</td>
+        <td>{{ usuario.email }}</td>
+        <td>{{ usuario.get_rol_display }}</td>
+        <td>{% if usuario.activo %}Activo{% else %}Inactivo{% endif %}</td>
+        <td><a href="{% url 'editar_usuario' usuario.id %}">Editar</a></td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="5">No hay usuarios registrados.</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

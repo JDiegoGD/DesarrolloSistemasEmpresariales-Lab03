@@ -1,0 +1,14 @@
+{% extends 'inventario/base.html' %}
+
+{% block title %}Editar Equipo{% endblock %}
+
+{% block content %}
+<h2>Editar Equipo: {{ objeto }}</h2>
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Guardar Cambios</button>
+</form>
+<br>
+<a href="{% url 'lista_equipos' %}">Volver al Listado</a>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends 'inventario/base.html' %}
+
+{% block title %}Equipos Instalados{% endblock %}
+
+{% block content %}
+<h2>Listado de Equipos Instalados (RF-04)</h2>
+
+<form class="filtros" method="get">
+    <label for="cliente">Cliente:</label>
+    <select name="cliente" id="cliente">
+        <option value="">Todos</option>
+        {% for cliente in clientes %}
+        <option value="{{ cliente.id }}" {% if filtros.cliente == cliente.id|stringformat:"s" %}selected{% endif %}>{{ cliente.razon_social }}</option>
+        {% endfor %}
+    </select>
+
+    <label for="garantia">Garantía:</label>
+    <select name="garantia" id="garantia">
+        <option value="" {% if not filtros.garantia %}selected{% endif %}>Todas</option>
+        <option value="vigente" {% if filtros.garantia == 'vigente' %}selected{% endif %}>Vigente</option>
+        <option value="vencida" {% if filtros.garantia == 'vencida' %}selected{% endif %}>Vencida</option>
+    </select>
+
+    <label for="desde">Instalado desde:</label>
+    <input type="date" name="desde" id="desde" value="{{ filtros.desde }}">
+
+    <label for="hasta">Instalado hasta:</label>
+    <input type="date" name="hasta" id="hasta" value="{{ filtros.hasta }}">
+
+    <button type="submit">Filtrar</button>
+    <a href="{% url 'lista_equipos' %}">Limpiar</a>
+</form>
+
+<table>
+    <tr>
+        <th>N° Serie</th>
+        <th>Producto</th>
+        <th>Cliente</th>
+        <th>Fecha Instalación</th>
+        <th>Fin de Garantía</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+    </tr>
+    {% for equipo in equipos %}
+    <tr>
+        <td>{{ equipo.numero_serie }}</td>
+        <td>{{ equipo.producto }}</td>
+        <td>{{ equipo.cliente.razon_social }}</td>
+        <td>{{ equipo.fecha_instalacion }}</td>
+        <td>{{ equipo.fin_garantia }}</td>
+        <td>{{ equipo.get_estado_display }}</td>
+        <td><a href="{% url 'editar_equipo' equipo.id %}">Editar</a></td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="7">No hay equipos que coincidan con los filtros.</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

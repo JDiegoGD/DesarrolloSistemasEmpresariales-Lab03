@@ -1,0 +1,14 @@
+{% extends 'inventario/base.html' %}
+
+{% block title %}Editar Ticket{% endblock %}
+
+{% block content %}
+<h2>Editar Ticket: {{ objeto }}</h2>
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Guardar Cambios</button>
+</form>
+<br>
+<a href="{% url 'lista_tickets' %}">Volver al Listado</a>
+{% endblock %}
