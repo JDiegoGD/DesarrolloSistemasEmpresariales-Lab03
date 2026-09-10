@@ -43,13 +43,16 @@ class Producto(models.Model):
     categoria = models.ForeignKey(
         Categoria,
         on_delete=models.PROTECT,
-        related_name='productos'
+        related_name='productos',
+        null=True,
+        blank=True
     )
 
     proveedores = models.ManyToManyField(
         Proveedor,
         through='Suministro',
-        related_name='productos'
+        related_name='productos',
+        blank=True
     )
 
     def __str__(self):
