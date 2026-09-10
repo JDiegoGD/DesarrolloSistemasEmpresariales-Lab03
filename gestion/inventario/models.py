@@ -84,3 +84,13 @@ class TicketSoporte(models.Model):
 
     def __str__(self):
         return f"{self.codigo_ticket} - {self.estado}"
+    
+class FichaTecnica(models.Model):
+    producto = models.OneToOneField(Producto, on_delete=models.CASCADE, related_name='ficha_tecnica')
+    especificaciones = models.TextField(help_text="Detalles técnicos, dimensiones, peso, consumo eléctrico, etc.")
+    manual_usuario_url = models.URLField(max_length=255, blank=True, null=True, help_text="Enlace al manual o documentación digital")
+    norma_certificacion = models.CharField(max_length=100, blank=True, null=True, help_text="Ejemplo: ISO 9001, CE, RoHS, etc.")
+    fecha_revision = models.DateField(auto_now=True)
+
+    def __str__(self):
+        return f"Ficha Técnica - {self.producto.nombre}"
