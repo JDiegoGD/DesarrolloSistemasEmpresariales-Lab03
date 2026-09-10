@@ -23,6 +23,15 @@ class Categoria(models.Model):
     def __str__(self):
         return self.nombre
 
+class Proveedor(models.Model):
+    nombre_empresa = models.CharField(max_length=150)
+    ruc_nit = models.CharField(max_length=20, unique=True)
+    contacto = models.CharField(max_length=100)
+    telefono = models.CharField(max_length=20)
+
+    def __str__(self):
+        return self.nombre_empresa
+
 class Producto(models.Model):
     codigo_sku = models.CharField(max_length=50, unique=True)
     nombre = models.CharField(max_length=100)
@@ -34,6 +43,12 @@ class Producto(models.Model):
     categoria = models.ForeignKey(
         Categoria,
         on_delete=models.PROTECT,
+        related_name='productos'
+    )
+
+    proveedores = models.ManyToManyField(
+        Proveedor,
+        through='Suministro',
         related_name='productos'
     )
 
@@ -110,3 +125,22 @@ class FichaTecnica(models.Model):
 
     def __str__(self):
         return f"Ficha Técnica - {self.producto.nombre}"
+
+
+
+
+class Suministro(models.Model):
+    producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
+    proveedor = models.ForeignKey(Proveedor, on_delete=models.CASCADE)
+    
+    precio_compra = models.DecimalField(max_digits=10, decimal_places=2)
+    dias_entrega_promedio = models.IntegerField(help_text="Tiempo estimado de entrega en días")
+    es_proveedor_principal = models.BooleanField(default=False)
+    fecha_ultimo_pedido = models.DateField(auto_now=True)
+
+    class Meta:
+        # Evita duplicar el mismo proveedor para el mismo producto
+        unique_together = ('producto', 'proveedor')
+
+    def __str__(self):
+        return f"{self.proveedor.nombre_empresa} -> {self.producto.nombre}"
