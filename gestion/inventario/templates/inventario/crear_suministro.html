@@ -1,0 +1,24 @@
+{% extends 'inventario/base.html' %}
+
+{% block title %}Agregar Proveedor{% endblock %}
+
+{% block content %}
+<div class="container mt-4" style="max-width: 600px;">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h3 class="card-title mb-0">Agregar Proveedor a: {{ producto.nombre }}</h3>
+            <small>Modelo intermedio: Suministro (Producto &harr; Proveedor)</small>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-success">Guardar Suministro</button>
+                    <a href="{% url 'productos_proveedores' %}" class="btn btn-outline-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends 'inventario/base.html' %}
+
+{% block title %}Editar Suministro{% endblock %}
+
+{% block content %}
+<div class="container mt-4" style="max-width: 600px;">
+    <div class="card shadow-sm">
+        <div class="card-header bg-warning">
+            <h3 class="card-title mb-0">Editar Suministro</h3>
+            <small>{{ objeto.proveedor.nombre_empresa }} &rarr; {{ objeto.producto.nombre }}</small>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-success">Guardar Cambios</button>
+                    <a href="{% url 'productos_proveedores' %}" class="btn btn-outline-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,5 +1,5 @@
 from django import forms
-from .models import Producto, Cliente, Usuario, EquipoInstalado, TicketSoporte
+from .models import Producto, Cliente, Usuario, EquipoInstalado, TicketSoporte, Suministro
 
 
 class ProductoForm(forms.ModelForm):
@@ -41,3 +41,11 @@ class TicketSoporteForm(forms.ModelForm):
     class Meta:
         model = TicketSoporte
         fields = ['codigo_ticket', 'descripcion_falla', 'prioridad', 'estado', 'equipo', 'tecnico']
+
+
+# Formulario del modelo intermedio de la relación N:M (Producto <-> Proveedor).
+# 'producto' no se incluye: se fija desde la vista según el producto sobre el que se opera.
+class SuministroForm(forms.ModelForm):
+    class Meta:
+        model = Suministro
+        fields = ['proveedor', 'precio_compra', 'dias_entrega_promedio', 'es_proveedor_principal']

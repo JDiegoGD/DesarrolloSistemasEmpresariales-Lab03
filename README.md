@@ -1,5 +1,8 @@
 # DesarrolloSistemasEmpresariales-Lab03
 
+## Repositorio (Modo de entrega)
+https://github.com/JDiegoGD/DesarrolloSistemasEmpresariales-Lab03
+
 ## Problematica:
 ##### Gestión ineficiente en la cadena de suministro y servicios postventa de una Empresa Distribuidora de Equipos Médicos.
 
@@ -213,3 +216,70 @@ Caso de uso documentado: el usuario abre **"Productos & Proveedores"**, que rend
 | `.prefetch_related('suministro_set__proveedor')` | `SELECT * FROM inventario_proveedor WHERE id IN (<proveedor_id de los suministros obtenidos>);` |
 | `suministro.proveedor` (tras el prefetch) | Ninguna: ya está en caché de Python — sin esto sería `SELECT * FROM inventario_proveedor WHERE id = <proveedor_id>;` por cada fila |
 | Alternativa con `select_related` (usada en `lista_productos` para `categoria`/`ficha_tecnica`) | `SELECT ... FROM inventario_producto INNER/LEFT JOIN inventario_categoria ON ... LEFT JOIN inventario_ficha_tecnica ON ...;` (una sola consulta con `JOIN`, apta para 1:1 y 1:N pero no para N:M porque duplicaría filas) |
+
+### Observación técnica
+
+En esta misma plantilla, `producto.categoria.nombre` **no** está en el `prefetch_related`/`select_related` de la vista `productos_proveedores`, por lo que cada fila dispara un `SELECT * FROM inventario_categoria WHERE id = <categoria_id>` adicional (patrón N+1). Es la comparación práctica de por qué `select_related`/`prefetch_related` existen: sin ellos, cada acceso a una relación desde el template genera una consulta nueva a SQLite.
+
+---
+
+## Modelo de Datos Ampliado (Entidades y Relaciones)
+
+Sobre las 5 entidades originales de la Semana 3 (`Cliente`, `Producto`, `Usuario`, `EquipoInstalado`, `TicketSoporte`, vinculadas únicamente por Foreign Key) se incorporaron los tres tipos de relación exigidos, sumando 4 entidades nuevas: `Categoria`, `FichaTecnica`, `Proveedor` y `Suministro` (modelo intermedio). El modelo completo queda en 9 entidades.
+
+### Entidades
+
+| Entidad | Rol en el dominio |
+|---|---|
+| `Cliente` | Clínica/hospital que compra equipos y reporta soporte |
+| `Producto` | Equipo médico del catálogo (entidad central del modelo) |
+| `Usuario` | Personal interno del sistema (admin, ventas, logística, técnico) |
+| `EquipoInstalado` | Instancia física de un `Producto` en las instalaciones de un `Cliente` |
+| `TicketSoporte` | Incidencia técnica registrada sobre un `EquipoInstalado` |
+| `Categoria` | Clasificación de `Producto` (ej. Refrigeración, Climatización) |
+| `FichaTecnica` | Detalle técnico exclusivo de un `Producto` (dimensiones, certificaciones, manual) |
+| `Proveedor` | Empresa externa que abastece `Producto` |
+| `Suministro` | Modelo intermedio: qué `Proveedor` abastece qué `Producto` y en qué condiciones comerciales |
+
+### Relaciones
+
+| Relación | Tipo | Implementación Django | Acceso desde código/template |
+|---|---|---|---|
+| Categoria → Producto | 1:N | `Producto.categoria = ForeignKey(Categoria, on_delete=PROTECT, related_name='productos')` | Directo: `producto.categoria` · Inverso: `categoria.productos.all()` |
+| Producto → FichaTecnica | 1:1 | `FichaTecnica.producto = OneToOneField(Producto, on_delete=CASCADE, related_name='ficha_tecnica')` | Directo: `producto.ficha_tecnica` |
+| Producto ↔ Proveedor | N:M con modelo intermedio | `Producto.proveedores = ManyToManyField(Proveedor, through='Suministro', related_name='productos')` | `producto.suministro_set.all()` → `suministro.proveedor`, exponiendo además `precio_compra`, `dias_entrega_promedio`, `es_proveedor_principal`, `fecha_ultimo_pedido` |
+| Producto → EquipoInstalado | 1:N (Semana 3) | `EquipoInstalado.producto = ForeignKey(Producto, on_delete=CASCADE, related_name='equipos')` | `producto.equipos.all()` |
+| Cliente → EquipoInstalado | 1:N (Semana 3) | `EquipoInstalado.cliente = ForeignKey(Cliente, on_delete=CASCADE, related_name='equipos')` | `cliente.equipos.all()` |
+| EquipoInstalado → TicketSoporte | 1:N (Semana 3) | `TicketSoporte.equipo = ForeignKey(EquipoInstalado, on_delete=CASCADE, related_name='tickets')` | `equipo.tickets.all()` |
+| Usuario → TicketSoporte | 1:N (Semana 3) | `TicketSoporte.tecnico = ForeignKey(Usuario, on_delete=SET_NULL, null=True, related_name='tickets_asignados')` | `usuario.tickets_asignados.all()` |
+
+### Integridad del modelo intermedio
+
+`Suministro` define `unique_together = ('producto', 'proveedor')`: un mismo proveedor no puede registrarse dos veces para el mismo producto. Las vistas `crear_suministro` y `editar_suministro` capturan el `IntegrityError` resultante y lo devuelven como error de formulario legible en vez de un error 500.
+
+### CRUD del modelo intermedio
+
+Se implementó el CRUD completo de `Suministro` (agregar, editar y quitar un proveedor de un producto, con sus atributos propios), accesible desde "Productos & Proveedores":
+
+```
+templates/
+└── inventario/
+    ├── crear_suministro.html
+    ├── editar_suministro.html
+    └── eliminar_suministro.html
+```
+
+* `crear_suministro(request, producto_pk)` — crea un `Suministro` fijando el `Producto` por URL y seleccionando el `Proveedor` y sus condiciones (precio de compra, días de entrega, si es principal) en el formulario.
+* `editar_suministro(request, pk)` — actualiza las condiciones comerciales de una relación producto-proveedor ya existente.
+* `eliminar_suministro(request, pk)` — quita a un proveedor de un producto, con pantalla de confirmación previa.
+
+### Dependencias (`requirements.txt`)
+
+```
+asgiref==3.12.1
+Django==6.1.1
+sqlparse==0.6.0
+tzdata==2026.3
+```
+
+No se agregaron paquetes nuevos para la ampliación del modelo: los tres tipos de relación (1:1, 1:N, N:M) y el CRUD del modelo intermedio se resuelven con el ORM de Django incluido en la dependencia base.
