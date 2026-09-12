@@ -5,7 +5,14 @@ from .models import Producto, Cliente, Usuario, EquipoInstalado, TicketSoporte
 class ProductoForm(forms.ModelForm):
     class Meta:
         model = Producto
-        fields = ['codigo_sku', 'nombre', 'marca', 'modelo', 'precio_base', 'meses_garantia']
+        fields = ['codigo_sku',
+                    'nombre',
+                    'marca',
+                    'modelo',
+                    'precio_base',
+                    'meses_garantia',
+                    'categoria',
+                ]
 
 
 class ClienteForm(forms.ModelForm):

@@ -1,0 +1,51 @@
+{% extends "inventario/base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Catálogo de Productos y sus Proveedores</h2>
+
+    <div class="row">
+        {% for producto in productos %}
+        <div class="col-md-6 mb-4">
+            <div class="card h-100 shadow-sm border-0 bg-light">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h4 class="card-title text-primary m-0">{{ producto.nombre }}</h4>
+                        <span class="badge bg-dark">{{ producto.codigo_sku }}</span>
+                    </div>
+                    
+                    <p class="text-muted mb-3">
+                        <strong>Categoría:</strong> {{ producto.categoria.nombre|default:"Sin categoría" }}
+                    </p>
+                    
+                    <h6 class="border-bottom pb-2">Proveedores Asociados (Modelo Intermedio):</h6>
+                    
+                    <div class="list-group list-group-flush">
+                        {% for suministro in producto.suministro_set.all %}
+                        <div class="list-group-item bg-white rounded mb-2 border">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <strong class="text-dark">{{ suministro.proveedor.nombre_empresa }}</strong>
+                                {% if suministro.es_proveedor_principal %}
+                                    <span class="badge bg-success">Principal</span>
+                                {% endif %}
+                            </div>
+                            <small class="text-muted d-block mt-1">
+                                <strong>Precio Compra:</strong> ${{ suministro.precio_compra }} | 
+                                <strong>Entrega:</strong> {{ suministro.dias_entrega_promedio }} días
+                            </small>
+                        </div>
+                        {% empty %}
+                        <p class="text-muted small fst-italic my-2">No hay proveedores registrados para este producto.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info text-center">No hay productos disponibles.</div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

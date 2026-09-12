@@ -1,0 +1,32 @@
+{% extends "inventario/base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="p-4 mb-4 bg-light rounded-3 border">
+        <h1 class="display-6 fw-bold text-dark">{{ categoria.nombre }}</h1>
+        <p class="col-md-8 fs-5 text-muted">{{ categoria.descripcion|default:"Sin descripcion disponible." }}</p>
+    </div>
+
+    <h3 class="mb-3">Productos en esta Categoria <small class="text-muted fs-6">(Acceso inverso)</small></h3>
+
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        <!-- Acceso inverso usando related_name='productos' -->
+        {% for producto in categoria.productos.all %}
+        <div class="col">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <span class="badge bg-secondary float-end">{{ producto.codigo_sku }}</span>
+                    <h5 class="card-title">{{ producto.nombre }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">{{ producto.marca }}</h6>
+                    <p class="card-text fs-4 text-success fw-bold">${{ producto.precio_base }}</p>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-warning">No hay productos asociados a esta categoría.</div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

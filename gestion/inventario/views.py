@@ -241,3 +241,19 @@ def eliminar_ticket(request, pk):
         return redirect('lista_tickets')
 
     return render(request, 'inventario/eliminar_ticket.html', {'objeto': ticket})
+
+
+# Vista para Consultar una Categoría y listar sus Productos (Acceso Inverso via related_name)
+def detalle_categoria(request, pk):
+    """
+    Usa prefetch_related('productos') para traer en una consulta optimizada
+    la Categoría y todos los Productos asociados a ella (Acceso Inverso).
+    """
+    categoria = get_object_or_404(
+        Categoria.objects.prefetch_related('productos'),
+        pk=pk
+    )
+    
+    return render(request, 'inventario/detalle_categoria.html', {
+        'categoria': categoria
+    })

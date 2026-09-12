@@ -22,4 +22,7 @@ urlpatterns = [
     path('tickets/', views.lista_tickets, name='lista_tickets'),
     path('tickets/<int:pk>/editar/', views.editar_ticket, name='editar_ticket'),
     path('tickets/<int:pk>/eliminar/', views.eliminar_ticket, name='eliminar_ticket'),
+
+    path('productos/proveedores/', views.productos_proveedores, name='productos_proveedores'),
+    path('categorias/<int:pk>/', views.detalle_categoria, name='detalle_categoria'),
 ]

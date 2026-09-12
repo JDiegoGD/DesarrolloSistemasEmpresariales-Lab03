@@ -1,38 +1,65 @@
-{% extends 'inventario/base.html' %}
-
-{% block title %}Listado de Productos{% endblock %}
+{% extends "inventario/base.html" %}
 
 {% block content %}
-<h2>Lista de Productos Médicos</h2>
-<a href="{% url 'crear_producto' %}">+ Registrar Nuevo Producto</a>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Listado de Productos</h2>
+        <a href="{% url 'crear_producto' %}" class="btn btn-primary">+ Crear Nuevo Producto</a>
+    </div>
 
-<table>
-    <tr>
-        <th>SKU</th>
-        <th>Nombre</th>
-        <th>Marca</th>
-        <th>Modelo</th>
-        <th>Precio</th>
-        <th>Garantía (meses)</th>
-        <th>Acciones</th>
-    </tr>
-    {% for producto in productos %}
-    <tr>
-        <td>{{ producto.codigo_sku }}</td>
-        <td>{{ producto.nombre }}</td>
-        <td>{{ producto.marca }}</td>
-        <td>{{ producto.modelo }}</td>
-        <td>S/ {{ producto.precio_base }}</td>
-        <td>{{ producto.meses_garantia }}</td>
-        <td>
-            <a href="{% url 'editar_producto' producto.id %}">Editar</a> |
-            <a href="{% url 'eliminar_producto' producto.id %}">Eliminar</a>
-        </td>
-    </tr>
-    {% empty %}
-    <tr>
-        <td colspan="7">No hay productos registrados.</td>
-    </tr>
-    {% endfor %}
-</table>
+    <div class="table-responsive">
+        <table class="table table-striped table-hover border align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>SKU</th>
+                    <th>Nombre</th>
+                    <th>Marca</th>
+                    <th>Precio Base</th>
+                    <th>Categoría (1:N)</th>
+                    <th>Ficha Técnica (1:1)</th>
+                    <th class="text-center">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for producto in productos %}
+                <tr>
+                    <td><span class="badge bg-secondary">{{ producto.codigo_sku }}</span></td>
+                    <td class="fw-bold">{{ producto.nombre }}</td>
+                    <td>{{ producto.marca }}</td>
+                    <td>${{ producto.precio_base }}</td>
+                    
+                    <!-- Acceso directo a 1:N -->
+                    <td>
+                        {% if producto.categoria %}
+                            <a href="{% url 'detalle_categoria' producto.categoria.pk %}" class="badge bg-info text-dark text-decoration-none">{{ producto.categoria.nombre }}</a>
+                        {% else %}
+                            <span class="text-muted">Sin categoría</span>
+                        {% endif %}
+                    </td>
+                    
+                    <!-- Acceso directo a 1:1 -->
+                    <td>
+                        {% if producto.ficha_tecnica %}
+                            <small class="text-truncate d-inline-block" style="max-width: 150px;">
+                                {{ producto.ficha_tecnica.especificaciones }}
+                            </small>
+                        {% else %}
+                            <span class="badge bg-light text-muted border">Sin ficha</span>
+                        {% endif %}
+                    </td>
+                    
+                    <td class="text-center">
+                        <a href="{% url 'editar_producto' producto.pk %}" class="btn btn-sm btn-outline-warning">Editar</a>
+                        <a href="{% url 'eliminar_producto' producto.pk %}" class="btn btn-sm btn-outline-danger">Eliminar</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center text-muted py-4">No hay productos registrados.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
 {% endblock %}

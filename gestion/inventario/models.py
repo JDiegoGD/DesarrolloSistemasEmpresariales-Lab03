@@ -17,8 +17,8 @@ class Categoria(models.Model):
     descripcion = models.TextField(blank=True, null=True)
 
     class Meta:
-        verbose_name = "Categoría"
-        verbose_name_plural = "Categorías"
+        verbose_name = "Categoria"
+        verbose_name_plural = "Categorias"
 
     def __str__(self):
         return self.nombre
