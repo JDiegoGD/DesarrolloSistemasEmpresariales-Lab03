@@ -178,3 +178,38 @@ templates/
     ├── eliminar_ticket.html
     └── eliminar_usuario.html
 ```
+
+---
+
+
+Relación elegida: **N:M con modelo intermedio** entre `Producto` y `Proveedor`, a través de `Suministro` (campos propios: `precio_compra`, `dias_entrega_promedio`, `es_proveedor_principal`, `fecha_ultimo_pedido`). Es la relación más completa de las tres (1:1, 1:N, N:M) porque obliga a atravesar una tabla puente en vez de una FK directa.
+
+Caso de uso documentado: el usuario abre **"Productos & Proveedores"**, que renderiza `productos_proveedores.html` a partir de la vista `productos_proveedores`.
+
+### Recorrido completo
+
+```
+1. Request  → GET /inventario/productos/proveedores/
+2. URL      → gestion/urls.py enruta el prefijo "inventario/" a inventario/urls.py,
+              que resuelve la ruta al view `productos_proveedores` (name="productos_proveedores")
+3. View     → views.productos_proveedores(request) arma el queryset
+4. ORM      → Producto.objects.prefetch_related('suministro_set__proveedor').order_by('nombre')
+              (queryset LAZY: todavía no toca la base de datos)
+5. SQLite   → Al evaluarse el queryset (paso 8) se disparan 3 SELECT (ver tabla más abajo)
+6. View     → recibe el queryset ya resuelto en memoria (con las relaciones precargadas)
+7. Context  → render(request, 'inventario/productos_proveedores.html', {'productos': productos})
+8. Template → {% for producto in productos %} evalúa el queryset (dispara el SQL real)
+              {% for suministro in producto.suministro_set.all %} recorre el modelo intermedio
+              {{ suministro.proveedor.nombre_empresa }} accede al Proveedor final
+9. Response → Django serializa el HTML resultante en un HttpResponse 200 (text/html)
+```
+
+### Operación SQL conceptual de cada acción ORM
+
+| Acción ORM | SQL conceptual equivalente |
+|---|---|
+| `Producto.objects.order_by('nombre')` | `SELECT * FROM inventario_producto ORDER BY nombre ASC;` |
+| `.prefetch_related('suministro_set')` | `SELECT * FROM inventario_suministro WHERE producto_id IN (<ids de la consulta anterior>);` (consulta separada, no `JOIN`) |
+| `.prefetch_related('suministro_set__proveedor')` | `SELECT * FROM inventario_proveedor WHERE id IN (<proveedor_id de los suministros obtenidos>);` |
+| `suministro.proveedor` (tras el prefetch) | Ninguna: ya está en caché de Python — sin esto sería `SELECT * FROM inventario_proveedor WHERE id = <proveedor_id>;` por cada fila |
+| Alternativa con `select_related` (usada en `lista_productos` para `categoria`/`ficha_tecnica`) | `SELECT ... FROM inventario_producto INNER/LEFT JOIN inventario_categoria ON ... LEFT JOIN inventario_ficha_tecnica ON ...;` (una sola consulta con `JOIN`, apta para 1:1 y 1:N pero no para N:M porque duplicaría filas) |
