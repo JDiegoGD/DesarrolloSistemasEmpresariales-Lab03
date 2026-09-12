@@ -1,12 +1,23 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
-from .models import Producto, Cliente, Usuario, EquipoInstalado, TicketSoporte
+from .models import Producto, Cliente, Usuario, EquipoInstalado, TicketSoporte, Suministro, Proveedor, Categoria, FichaTecnica
 from .forms import ProductoForm, ClienteForm, UsuarioForm, EquipoInstaladoForm, TicketSoporteForm
 
-# Vista para Listar Productos (Destino del redirect)
+
+# Vista para Listar Productos (Optimizado con select_related para 1:1 y 1:N)
 def lista_productos(request):
-    productos = Producto.objects.all().order_by('nombre')
+    productos = Producto.objects.select_related('categoria', 'ficha_tecnica').all().order_by('nombre')
     return render(request, 'inventario/lista_productos.html', {'productos': productos})
+
+
+# Vista para Consultar Productos con Proveedores (Optimizado con prefetch_related para N:M con modelo intermedio)
+def productos_proveedores(request):
+    productos = Producto.objects.prefetch_related(
+        'suministro_set__proveedor'
+    ).order_by('nombre')
+
+    return render(request, 'inventario/productos_proveedores.html', {'productos': productos})
+
 
 # Vista para Crear un Producto (CREATE mediante ORM)
 def crear_producto(request):
